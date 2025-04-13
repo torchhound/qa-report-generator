@@ -211,6 +211,7 @@ html, body {
 .clear-btn {
   background-color: #ff4444;
   color: white;
+  margin-bottom: 0.75rem;
 }
 
 .clear-btn:hover {
@@ -245,7 +246,7 @@ html, body {
 
 .sticky-button-container {
   position: sticky;
-  top: 1.75rem;
+  top: 0.1rem;
   z-index: 10;
   background-color: #1e1e1e;
   padding: 1rem;
@@ -429,6 +430,122 @@ html, body {
   color: var(--text-color);
   resize: vertical;
   box-sizing: border-box;
+}
+
+/* Content Items Styles */
+.content-items-container {
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.content-items-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.add-content-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.add-text-btn {
+  background-color: #2a2a2a;
+  color: var(--text-color);
+}
+
+.add-text-btn:hover {
+  background-color: #3a3a3a;
+}
+
+.add-image-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.add-image-btn:hover {
+  background-color: var(--secondary-color);
+}
+
+.content-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.content-item {
+  background-color: #2a2a2a;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.content-item-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #333333;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.content-item-type {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #aaa;
+}
+
+.delete-content-btn {
+  background: none;
+  border: none;
+  color: #ff4444;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+}
+
+.delete-content-btn:hover {
+  color: #ff6666;
+}
+
+.content-item-body {
+  padding: 0.5rem;
+}
+
+.content-text-area {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  background-color: #222;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.content-image-container {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.content-image {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 4px;
+}
+
+.no-content-items {
+  padding: 2rem;
+  text-align: center;
+  background-color: #2a2a2a;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  color: #aaa;
 }
 
 .container {

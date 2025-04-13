@@ -1,10 +1,18 @@
+export type ContentItemType = 'text' | 'image';
+
+export type ContentItem = {
+  id: string;
+  type: ContentItemType;
+  content: string; // text content or image data URL
+  order: number;
+};
+
 export type ReportEntry = {
   id: string;
   timestamp: string; // iso8601
   classification: 'bug' | 'papercut' | 'feature';
   title: string;
-  description: string;
-  screenshotPath: string;
+  contentItems: ContentItem[];
 };
 
 export type ReportState = {

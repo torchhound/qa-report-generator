@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { ReportState, ReportEntry } from './types';
+import { ReportState, ReportEntry, ContentItem } from './types';
 import { TitlePage } from './components/TitlePage';
 import { IntroductionPage } from './components/IntroductionPage';
 import { ReportEntries } from './components/ReportEntries';
@@ -13,7 +13,62 @@ function App() {
     const savedState = localStorage.getItem('qaReportState');
     if (savedState) {
       try {
-        return JSON.parse(savedState);
+        const parsedState = JSON.parse(savedState);
+        
+        // Migrate existing entries to the new data model if needed
+        const migratedEntries = parsedState.entries.map((entry: any) => {
+          // Check if the entry already has contentItems
+          if (entry.contentItems) {
+            return entry;
+          }
+          
+          // Migrate old format to new format
+          const contentItems: ContentItem[] = [];
+          
+          // Add description as text item if it exists
+          if (entry.description && entry.description.trim() !== '') {
+            contentItems.push({
+              id: crypto.randomUUID(),
+              type: 'text',
+              content: entry.description,
+              order: 0
+            });
+          }
+          
+          // Add screenshot as image item if it exists
+          if (entry.screenshotPath && entry.screenshotPath.trim() !== '') {
+            contentItems.push({
+              id: crypto.randomUUID(),
+              type: 'image',
+              content: entry.screenshotPath,
+              order: contentItems.length
+            });
+          }
+          
+          // If no content items were created, add an empty text item
+          if (contentItems.length === 0) {
+            contentItems.push({
+              id: crypto.randomUUID(),
+              type: 'text',
+              content: '',
+              order: 0
+            });
+          }
+          
+          // Return the migrated entry
+          return {
+            id: entry.id,
+            timestamp: entry.timestamp,
+            classification: entry.classification,
+            title: entry.title,
+            contentItems: contentItems
+          };
+        });
+        
+        return {
+          ...parsedState,
+          entries: migratedEntries
+        };
       } catch (e) {
         console.error('Failed to parse saved state:', e);
       }
@@ -88,8 +143,14 @@ function App() {
       timestamp: new Date().toISOString(),
       classification: 'bug',
       title: '',
-      description: '',
-      screenshotPath: ''
+      contentItems: [
+        {
+          id: crypto.randomUUID(),
+          type: 'text',
+          content: '',
+          order: 0
+        }
+      ]
     };
     
     setReportState(current => ({

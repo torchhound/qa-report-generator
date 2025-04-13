@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ReportState } from '../types';
+import { ReportState, ContentItem } from '../types';
 
 interface ExportControlsProps {
   reportState: ReportState;
@@ -67,17 +67,34 @@ export function ExportControls({ reportState, onClearAll }: ExportControlsProps)
 }
 
 function generateHTML(reportState: ReportState): string {
-  const entriesHTML = reportState.entries.map((entry, index) => `
+  const entriesHTML = reportState.entries.map((entry, index) => {
+    // Generate HTML for each content item
+    const contentItemsHTML = entry.contentItems
+      .sort((a, b) => a.order - b.order) // Sort by order
+      .map(item => {
+        if (item.type === 'text') {
+          // Text content
+          return `<div class="content-text">${item.content.replace(/\n/g, '<br>')}</div>`;
+        } else if (item.type === 'image') {
+          // Image content
+          return `<div class="content-image"><img src="${item.content}" alt="Content Image"></div>`;
+        }
+        return '';
+      }).join('\n');
+
+    return `
     <div id="entry-${entry.id}" class="report-entry">
       <h2>${index + 3}. ${entry.title}</h2>
       <div class="entry-meta">
         <span class="classification classification-${entry.classification}">${entry.classification}</span>
         <span class="timestamp">${new Date(entry.timestamp).toLocaleString()}</span>
       </div>
-      ${entry.screenshotPath ? `<div class="screenshot"><img src="${entry.screenshotPath}" alt="Screenshot"></div>` : ''}
-      <div class="description">${entry.description.replace(/\n/g, '<br>')}</div>
+      <div class="content-items">
+        ${contentItemsHTML}
+      </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
   
   const tocItems = reportState.entries.map((entry, index) => `
     <li><a href="#entry-${entry.id}" class="toc-${entry.classification}">${index + 3}. <span class="toc-tag">[${entry.classification}]</span> ${entry.title}</a></li>
@@ -195,15 +212,26 @@ function generateHTML(reportState: ReportState): string {
           margin-right: 8px;
           font-weight: normal;
         }
-        .screenshot {
+        .content-items {
           margin: 20px 0;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
         }
-        .screenshot img {
+        .content-text {
+          background-color: #f9f9f9;
+          padding: 15px;
+          border-radius: 4px;
+          border: 1px solid #eee;
+          line-height: 1.6;
+        }
+        .content-image {
+          margin: 10px 0;
+        }
+        .content-image img {
           max-width: 100%;
           border: 1px solid #ddd;
-        }
-        .description {
-          margin-top: 20px;
+          border-radius: 4px;
         }
         @media print {
           body {
