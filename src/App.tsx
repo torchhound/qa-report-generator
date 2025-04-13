@@ -82,6 +82,8 @@ function App() {
       browser: '',
       appVersion: '',
       appUrl: '',
+      screenResolution: '',
+      browserPlugins: '',
       introductionText: '',
       entries: []
     };
@@ -129,6 +131,8 @@ function App() {
       browser: '',
       appVersion: '',
       appUrl: '',
+      screenResolution: '',
+      browserPlugins: '',
       introductionText: '',
       entries: []
     });

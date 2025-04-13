@@ -23,6 +23,8 @@ export type ReportState = {
   browser?: string;
   appVersion?: string;
   appUrl?: string;
+  screenResolution?: string;
+  browserPlugins?: string;
   introductionText: string;
   entries: ReportEntry[];
 };

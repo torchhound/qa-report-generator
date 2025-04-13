@@ -22,6 +22,18 @@ export function IntroductionPage({ reportState, onUpdate }: IntroductionPageProp
         </div>
         
         <div className="field-group">
+          <label htmlFor="screen-resolution">Screen Resolution (optional):</label>
+          <input
+            id="screen-resolution"
+            type="text"
+            value={reportState.screenResolution || ''}
+            onChange={(e) => onUpdate({ screenResolution: e.target.value })}
+            placeholder="e.g., 1920x1080, 2560x1440, 3840x2160"
+            className="intro-input"
+          />
+        </div>
+        
+        <div className="field-group">
           <label htmlFor="browser">Web Browser (optional):</label>
           <input
             id="browser"
@@ -29,6 +41,18 @@ export function IntroductionPage({ reportState, onUpdate }: IntroductionPageProp
             value={reportState.browser || ''}
             onChange={(e) => onUpdate({ browser: e.target.value })}
             placeholder="e.g., Chrome 123, Firefox 124, Safari 17"
+            className="intro-input"
+          />
+        </div>
+        
+        <div className="field-group">
+          <label htmlFor="browser-plugins">Browser Plugins (optional):</label>
+          <input
+            id="browser-plugins"
+            type="text"
+            value={reportState.browserPlugins || ''}
+            onChange={(e) => onUpdate({ browserPlugins: e.target.value })}
+            placeholder="e.g., AdBlock, LastPass, React DevTools"
             className="intro-input"
           />
         </div>
