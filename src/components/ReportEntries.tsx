@@ -1,5 +1,5 @@
 import { ReportState, ReportEntry } from '../types';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface ReportEntriesProps {
@@ -9,6 +9,59 @@ interface ReportEntriesProps {
 
 export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
   const [isUploading, setIsUploading] = useState<string | null>(null);
+  const [clipboardProcessing, setClipboardProcessing] = useState<string | null>(null);
+  const pasteAreaRef = useRef<HTMLDivElement>(null);
+  
+  // Setup paste event handler for the hidden paste area
+  useEffect(() => {
+    const pasteArea = pasteAreaRef.current;
+    if (!pasteArea) return;
+    
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!clipboardProcessing) return;
+      
+      if (e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            if (!blob) continue;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              if (event.target && event.target.result) {
+                updateEntry(clipboardProcessing, { 
+                  screenshotPath: event.target.result as string 
+                });
+              }
+              setClipboardProcessing(null);
+            };
+            
+            reader.onerror = () => {
+              console.error('Error reading clipboard image');
+              setClipboardProcessing(null);
+            };
+            
+            reader.readAsDataURL(blob);
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+        }
+        
+        // If we get here, no image was found
+        alert('No image found in clipboard. Please copy an image first.');
+        setClipboardProcessing(null);
+      }
+    };
+    
+    pasteArea.addEventListener('paste', handlePaste);
+    
+    return () => {
+      pasteArea.removeEventListener('paste', handlePaste);
+    };
+  }, [clipboardProcessing]);
   
   const addEntry = () => {
     const newEntry: ReportEntry = {
@@ -67,6 +120,29 @@ export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleClipboardPaste = (entryId: string) => {
+    // Set the active entry ID for clipboard processing
+    setClipboardProcessing(entryId);
+    
+    // Focus the hidden paste area to receive the paste event
+    if (pasteAreaRef.current) {
+      pasteAreaRef.current.focus();
+      
+      // Show instructions to the user
+      alert('Press Ctrl+V to paste your image');
+      
+      // Set a timeout to clear the processing state if no paste happens
+      setTimeout(() => {
+        if (clipboardProcessing === entryId) {
+          setClipboardProcessing(null);
+        }
+      }, 30000); // 30 seconds timeout
+    } else {
+      alert('Clipboard paste area not available');
+      setClipboardProcessing(null);
+    }
+  };
 
   const updateEntry = (id: string, updates: Partial<ReportEntry>) => {
     const updatedEntries = reportState.entries.map(entry =>
@@ -82,6 +158,20 @@ export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
 
   return (
     <div className="report-entries">
+      {/* Hidden div for paste events */}
+      <div 
+        ref={pasteAreaRef}
+        tabIndex={0}
+        style={{
+          position: 'absolute',
+          opacity: 0,
+          pointerEvents: clipboardProcessing ? 'auto' : 'none',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden'
+        }}
+      />
+      
       <div className="sticky-button-container">
         <button onClick={addEntry} className="add-entry-btn">
           Add New Entry
@@ -162,16 +252,25 @@ export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
                             </div>
                           </div>
                         ) : (
-                          <label className="upload-screenshot-btn">
-                            {isUploading === entry.id ? 'Uploading...' : 'Upload Screenshot'}
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              style={{ display: 'none' }}
-                              onChange={(e) => handleFileUpload(entry.id, e)}
-                              disabled={isUploading === entry.id}
-                            />
-                          </label>
+                          <div className="screenshot-upload-options">
+                            <label className="upload-screenshot-btn">
+                              {isUploading === entry.id ? 'Uploading...' : 'Upload Screenshot'}
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                style={{ display: 'none' }}
+                                onChange={(e) => handleFileUpload(entry.id, e)}
+                                disabled={isUploading === entry.id}
+                              />
+                            </label>
+                            <button 
+                              className="clipboard-paste-btn"
+                              onClick={() => handleClipboardPaste(entry.id)}
+                              disabled={clipboardProcessing === entry.id}
+                            >
+                              {clipboardProcessing === entry.id ? 'Waiting for paste...' : 'Paste from Clipboard'}
+                            </button>
+                          </div>
                         )}
                       </div>
 
