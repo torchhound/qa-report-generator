@@ -1,5 +1,5 @@
 import { ReportState, ReportEntry } from '../types';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface ReportEntriesProps {
@@ -9,6 +9,10 @@ interface ReportEntriesProps {
 
 export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
   const [isUploading, setIsUploading] = useState<string | null>(null);
+  const [latestEntryId, setLatestEntryId] = useState<string | null>(null);
+  
+  // Create refs for entries
+  const entryRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
   
   const addEntry = () => {
     const newEntry: ReportEntry = {
@@ -20,10 +24,27 @@ export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
       screenshotPath: ''
     };
     
+    // Set this as the latest entry to scroll to
+    setLatestEntryId(newEntry.id);
+    
     onUpdate({
       entries: [...reportState.entries, newEntry]
     });
   };
+  
+  // Effect to scroll to the latest entry when it's added
+  useEffect(() => {
+    if (latestEntryId && entryRefs.current[latestEntryId]) {
+      // Scroll the entry into view with smooth behavior
+      entryRefs.current[latestEntryId]?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+      
+      // Clear the latest entry ID after scrolling
+      setTimeout(() => setLatestEntryId(null), 100);
+    }
+  }, [latestEntryId, reportState.entries]);
   
   const handleDragEnd = (result: DropResult) => {
     // Dropped outside the list
@@ -101,44 +122,52 @@ export function ReportEntries({ reportState, onUpdate }: ReportEntriesProps) {
                   {(provided, snapshot) => (
                     <div 
                       className={`entry-item ${snapshot.isDragging ? 'dragging' : ''}`}
-                      ref={provided.innerRef}
+                      ref={(el) => {
+                        // Set both the Draggable ref and our custom ref
+                        provided.innerRef(el);
+                        if (entry.id === latestEntryId) {
+                          entryRefs.current[entry.id] = el;
+                        }
+                      }}
                       {...provided.draggableProps}
                     >
-                      <div className="entry-header">
-                        <div 
-                          className="drag-handle"
-                          {...provided.dragHandleProps}
-                          title="Drag to reorder"
-                        >
-                          <span className="drag-icon">☰</span>
+                      <div className="entry-content">
+                        <div className="entry-header">
+                          <div 
+                            className="drag-handle"
+                            {...provided.dragHandleProps}
+                            title="Drag to reorder"
+                          >
+                            <span className="drag-icon">☰</span>
+                          </div>
+                          
+                          <select
+                            value={entry.classification}
+                            onChange={(e) => updateEntry(entry.id, { 
+                              classification: e.target.value as 'bug' | 'papercut' | 'feature' 
+                            })}
+                            className={`classification-${entry.classification}`}
+                          >
+                            <option value="bug">Bug</option>
+                            <option value="papercut">Papercut</option>
+                            <option value="feature">Feature</option>
+                          </select>
+                          
+                          <input
+                            type="text"
+                            value={entry.title}
+                            onChange={(e) => updateEntry(entry.id, { title: e.target.value })}
+                            placeholder="Entry Title"
+                            className="entry-title"
+                          />
+                          
+                          <button 
+                            onClick={() => deleteEntry(entry.id)}
+                            className="delete-entry-btn"
+                          >
+                            Delete
+                          </button>
                         </div>
-                        
-                        <select
-                          value={entry.classification}
-                          onChange={(e) => updateEntry(entry.id, { 
-                            classification: e.target.value as 'bug' | 'papercut' | 'feature' 
-                          })}
-                          className={`classification-${entry.classification}`}
-                        >
-                          <option value="bug">Bug</option>
-                          <option value="papercut">Papercut</option>
-                          <option value="feature">Feature</option>
-                        </select>
-                        
-                        <input
-                          type="text"
-                          value={entry.title}
-                          onChange={(e) => updateEntry(entry.id, { title: e.target.value })}
-                          placeholder="Entry Title"
-                          className="entry-title"
-                        />
-                        
-                        <button 
-                          onClick={() => deleteEntry(entry.id)}
-                          className="delete-entry-btn"
-                        >
-                          Delete
-                        </button>
                       </div>
 
                       <div className="entry-screenshot">

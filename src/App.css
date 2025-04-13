@@ -245,10 +245,10 @@ html, body {
 
 .sticky-button-container {
   position: sticky;
-  top: 0;
+  top: 1.75rem;
   z-index: 10;
   background-color: #1e1e1e;
-  padding: 1rem 0;
+  padding: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
