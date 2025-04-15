@@ -254,8 +254,8 @@ function generateHTML(reportState: ReportState): string {
         <h2>2. Introduction</h2>
         <div class="system-info">
           <p><strong>Operating System:</strong> ${reportState.operatingSystem || 'Not specified'}</p>
-          ${reportState.browser ? `<p><strong>Browser:</strong> ${reportState.browser}</p>` : ''}
           ${reportState.screenResolution ? `<p><strong>Screen Resolution:</strong> ${reportState.screenResolution}</p>` : ''}
+          ${reportState.browser ? `<p><strong>Browser:</strong> ${reportState.browser}</p>` : ''}
           ${reportState.browserPlugins ? `<p><strong>Browser Plugins:</strong> ${reportState.browserPlugins}</p>` : ''}
           ${reportState.appVersion ? `<p><strong>Application Version:</strong> ${reportState.appVersion}</p>` : ''}
           ${reportState.appUrl ? `<p><strong>Application URL:</strong> ${reportState.appUrl}</p>` : ''}
